@@ -6,7 +6,7 @@ let router = express.Router();
 let bookController = (new class BookController {
   cgetAction(req, res) {
     const query = {
-      text: `SELECT book.id, book.title, book.description, array_agg(author.name) authors
+      text: `SELECT book.id, book.title 
           FROM book 
           LEFT JOIN author_to_book 
           ON book.id = author_to_book.book_id 
@@ -25,7 +25,7 @@ let bookController = (new class BookController {
     let book_id = req.params.book_id;
 
     const query = {
-      text: `SELECT book.*, array_agg(author.name) authors FROM book 
+      text: `SELECT book.*, array_agg(author.id) authors FROM book 
         LEFT JOIN author_to_book 
         ON book.id = author_to_book.book_id
         LEFT JOIN author
@@ -68,11 +68,16 @@ let bookController = (new class BookController {
 
               client.query(q);
             }
+
+            let book = {
+              id: book_id,
+              title: req.body.title
+            };
+
+            res.json({ body: JSON.stringify(book) });
           });
       })
       .catch(e => console.error(e.stack));
-
-    res.json({ body: "OK" });
   }
 
   putAction(req, res) {
@@ -104,11 +109,18 @@ let bookController = (new class BookController {
 
             client.query(q);
           }
+
+          let book = {
+            id: book_id,
+            title: req.body.title,
+            description: req.body.description,
+            authors: req.body.authors
+          };
+
+          res.json({ body: JSON.stringify(book) });
         });
       })
       .catch(e => console.error(e.stack));
-
-    res.json({ body: "OK" });
   }
 
   deleteAction(req, res) {
@@ -120,7 +132,7 @@ let bookController = (new class BookController {
     };
 
     client.query(query).then(ret => {
-      res.json({ body: "OK" });
+      res.json({ body: book_id });
     });
   }
 });
